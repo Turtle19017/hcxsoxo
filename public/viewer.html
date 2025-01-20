@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hiển thị mã QR</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+</head>
+<body>
+    <h1>Mã QR</h1>
+    <div id="qr"></div>
+    <p id="status"></p>
+    <script>
+        const ws = new WebSocket('ws://localhost:3000');
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            const qrCodeContainer = document.getElementById('qr');
+            const statusContainer = document.getElementById('status');
+
+            if (data.qr && data.url) {
+                // Hiển thị mã QR mới
+                qrCodeContainer.innerHTML = ""; // Xóa mã QR cũ
+
+                // Tạo thẻ <canvas> mới
+                const canvas = document.createElement('canvas');
+                qrCodeContainer.appendChild(canvas);
+
+                QRCode.toCanvas(canvas, data.url, { width: 200 });
+                statusContainer.innerText = `URL: ${data.url}`;
+            } else if (data.usedQR) {
+                // Khi mã QR bị quét
+                qrCodeContainer.innerHTML = "<p>Mã QR đã được quét và không còn hợp lệ.</p>";
+                statusContainer.innerText = "";
+            }
+        };
+    </script>
+</body>
+</html>
